@@ -75,10 +75,21 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
         PRIVATE libs/implot
         PRIVATE libs/imgui-docking/misc/cpp
     )
-    target_link_libraries(GuiAppTemplate
-        PRIVATE ${PROJECT_SOURCE_DIR}/libs/imgui-docking/examples/libs/glfw/lib-vc2010-64/glfw3.lib
-        PRIVATE opengl32.lib
-    )
+
+    if(WIN32)
+        target_link_libraries(GuiAppTemplate
+                PUBLIC ${PROJECT_SOURCE_DIR}/libs/imgui-docking/examples/libs/glfw/lib-vc2010-64/glfw3.lib
+                PUBLIC opengl32.lib
+        )
+    elseif(APPLE)
+        find_package(glfw3 3.3 REQUIRED)
+        find_package(OpenGL REQUIRED)
+        include_directories(${OPENGL_INCLUDE_DIRS})
+        target_link_libraries(GuiAppTemplate
+                PRIVATE glfw
+                PRIVATE "-framework OpenGL"
+        )
+    endif()
 else()
     # Static library
     file(GLOB SOURCES ${PROJECT_NAME}/*.?pp)
@@ -91,8 +102,18 @@ else()
         PUBLIC libs/implot
         PUBLIC libs/imgui-docking/misc/cpp
     )
-    target_link_libraries(GuiAppTemplate
+    if(WIN32)
+        target_link_libraries(GuiAppTemplate
         PUBLIC ${PROJECT_SOURCE_DIR}/libs/imgui-docking/examples/libs/glfw/lib-vc2010-64/glfw3.lib
         PUBLIC opengl32.lib
-    )
+        )
+    elseif(APPLE)
+        find_package(glfw3 3.3 REQUIRED)
+        find_package(OpenGL REQUIRED)
+        include_directories(${OPENGL_INCLUDE_DIRS})
+        target_link_libraries(GuiAppTemplate
+        PRIVATE glfw
+        PRIVATE "-framework OpenGL"
+        )
+    endif()
 endif()
